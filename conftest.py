@@ -8,6 +8,14 @@ def driver(request):
 
     options = webdriver.ChromeOptions()
 
+    # GitHub Actions sets CI=true automatically
+    if os.getenv("CI") == "true":
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--window-size=1920,1080")
+
+    # Enable network logs for integration testing
     options.set_capability(
         "goog:loggingPrefs",
         {"performance": "ALL"}
@@ -18,7 +26,7 @@ def driver(request):
 
     yield driver
 
-    # Take screenshot only if test FAILED
+    # Screenshot only when test fails
     if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
 
         os.makedirs("reports/screenshots", exist_ok=True)
